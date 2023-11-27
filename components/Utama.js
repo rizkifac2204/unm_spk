@@ -98,7 +98,7 @@ function Utama() {
       isNaN(parsedValue) ||
       averageColumnValue === 0
     ) {
-      return 0; // atau nilai default sesuai kebutuhan Anda
+      return 0;
     }
 
     return averageColumnValue * parsedValue;
