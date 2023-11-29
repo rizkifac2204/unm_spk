@@ -5,23 +5,33 @@ import { useState } from "react";
 const keys = [
   {
     poin: "t1",
+    key: "valuet1",
     title: "title 1",
+    rpw: "",
   },
   {
     poin: "t2",
+    key: "valuet2",
     title: "title 2",
+    rpw: "",
   },
   {
     poin: "t3",
+    key: "valuet3",
     title: "title 3",
+    rpw: "",
   },
   {
     poin: "t4",
+    key: "valuet4",
     title: "title 4",
+    rpw: "",
   },
   {
     poin: "t5",
+    key: "valuet5",
     title: "title 5",
+    rpw: "",
   },
 ];
 
@@ -35,6 +45,10 @@ const initialData = keys.map((item) => {
 
 function Utama() {
   const [data, setData] = useState(initialData);
+
+  const keysToSum = keys.map((item) => {
+    return item.key;
+  });
 
   const handleInputChange = (index, key, value) => {
     const newData = [...data];
@@ -61,7 +75,6 @@ function Utama() {
   };
 
   const averageNLColumn = (obj) => {
-    const keysToSum = ["valuet1", "valuet2", "valuet3", "valuet4", "valuet5"];
     const sum = keysToSum.reduce(
       (acc, key) => acc + (parseFloat(divisionNLColumn(key, obj[key])) || 0),
       0
@@ -124,7 +137,9 @@ function Utama() {
   const rpw = (r, pw) => {
     const a = parseFloat(r) || 0;
     const b = parseFloat(pw) || 0;
-    return parseFloat(a / b).toFixed(2);
+    const hasil = parseFloat(a / b).toFixed(2);
+    if (isNaN(hasil)) return 0;
+    return hasil;
   };
 
   return (
@@ -133,8 +148,6 @@ function Utama() {
         <h1 className="text-2xl font-bold mb-4">
           Aplikasi Sistem Penunjang Keputusan - Kelompok 3
         </h1>
-
-        {/* {JSON.stringify(data[0])} */}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
           <div className="bg-white p-4 shadow-md">
