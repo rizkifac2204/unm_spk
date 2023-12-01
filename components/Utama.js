@@ -1,39 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const keys = [
   {
     poin: "t1",
     key: "valuet1",
     title: "title 1",
-    rpw: "",
   },
   {
     poin: "t2",
     key: "valuet2",
     title: "title 2",
-    rpw: "",
   },
   {
     poin: "t3",
     key: "valuet3",
     title: "title 3",
-    rpw: "",
   },
   {
     poin: "t4",
     key: "valuet4",
     title: "title 4",
-    rpw: "",
   },
   {
     poin: "t5",
     key: "valuet5",
     title: "title 5",
-    rpw: "",
   },
 ];
+
+const TOTAL = keys.length;
 
 const initialData = keys.map((item) => {
   const values = {};
@@ -43,49 +40,106 @@ const initialData = keys.map((item) => {
   return { ...item, ...values };
 });
 
+const initialJumlah = keys.map((item) => {
+  const values = {};
+  keys.forEach((sub) => {
+    values[`jumlah`] = "";
+  });
+  return { ...item, ...values };
+});
+
+const initialNL = keys.map((item) => {
+  const values = {};
+  keys.forEach((sub) => {
+    values[`nl${sub.poin}`] = 0;
+  });
+  values[`pw`] = 0;
+  return { ...item, ...values };
+});
+
+const initialRS = keys.map((item) => {
+  const values = {};
+  keys.forEach((sub) => {
+    values[`rs${sub.poin}`] = 0;
+  });
+  return { ...item, ...values };
+});
+
 function Utama() {
   const [data, setData] = useState(initialData);
-
-  const keysToSum = keys.map((item) => {
-    return item.key;
-  });
+  const [jumlah, setJumlah] = useState(initialJumlah);
+  const [nl, setNl] = useState(initialNL);
+  const [rs, setRS] = useState(initialRS);
 
   const handleInputChange = (index, key, value) => {
     const newData = [...data];
     newData[index][key] = value;
-    setData(newData);
+    setData(() => newData);
+    const jml = data.reduce(
+      (total, item) => total + (parseFloat(item[key]) || 0),
+      0
+    );
+    const newJml = jumlah.map((item) => {
+      if (item.key === key) {
+        return { ...item, jumlah: jml };
+      }
+      return item;
+    });
+
+    setJumlah(() => newJml);
   };
 
-  const calculateColumnTotal = (columnName) => {
-    return data.reduce(
-      (total, item) => total + (parseFloat(item[columnName]) || 0),
-      0
+  const averageNLColumn = (obj, sw) => {
+    const totalNlt = Object.keys(obj)
+      .filter((key) => key.startsWith(sw))
+      .reduce((acc, key) => acc + obj[key], 0);
+
+    return (
+      totalNlt / Object.keys(obj).filter((key) => key.startsWith(sw)).length
     );
   };
 
-  const divisionNLColumn = (columnName, value) => {
-    const totalColumn = parseFloat(calculateColumnTotal(columnName));
-    const parsedValue = parseFloat(value);
+  const sumRSColumn = (obj, sw) => {
+    const total = Object.keys(obj)
+      .filter((key) => key.startsWith(sw))
+      .reduce((acc, key) => acc + obj[key], 0);
 
-    if (isNaN(totalColumn) || isNaN(parsedValue) || totalColumn === 0) {
-      return 0; // atau nilai default sesuai kebutuhan Anda
-    }
-
-    return parsedValue / totalColumn;
+    return total;
   };
 
-  const averageNLColumn = (obj) => {
-    const sum = keysToSum.reduce(
-      (acc, key) => acc + (parseFloat(divisionNLColumn(key, obj[key])) || 0),
-      0
+  const countRPW = (poin, rsValue) => {
+    const pwValue = nl.find((j) => j.poin == poin)?.[`pw`] || 0;
+    const hasil = rsValue / pwValue;
+    if (isNaN(hasil)) return 0;
+    return hasil;
+  };
+
+  useEffect(() => {
+    const newNl = nl.map((item, index) => {
+      const values = {};
+      keys.forEach((sub) => {
+        const dataValue =
+          data.find((j) => j.poin == item.poin)?.[`value${sub.poin}`] || 0;
+        const jumlahValue = jumlah.find((j) => j.poin == sub.poin)?.jumlah || 0;
+        const hasil = dataValue / jumlahValue;
+        values[`nl${sub.poin}`] = isNaN(hasil) ? 0 : hasil;
+      });
+      return {
+        ...item,
+        ...values,
+      };
+    });
+    setNl(() =>
+      newNl.map((item) => {
+        return { ...item, pw: averageNLColumn(item, "nlt") };
+      })
     );
-    return sum / 5;
-  };
+  }, [jumlah]);
 
   const sortNLColumn = (poin) => {
-    const newArray = data
+    const newArray = nl
       .map((item) => {
-        return { ...item, valuesAverage: averageNLColumn(item) };
+        return { ...item, valuesAverage: averageNLColumn(item, "nlt") };
       })
       .sort((a, b) => {
         // Jika salah satu dari valuesAverage kosong, letakkan di akhir
@@ -102,45 +156,42 @@ function Utama() {
     return findingIndex + 1;
   };
 
-  const multiplicationColumn = (objSpecific, value) => {
-    const parsedValue = parseFloat(value);
-    const averageColumnValue = parseFloat(averageNLColumn(objSpecific));
+  useEffect(() => {
+    const newRS = rs
+      .map((item, index) => {
+        const values = {};
+        keys.forEach((sub) => {
+          const dataValue =
+            data.find((j) => j.poin == item.poin)?.[`value${sub.poin}`] || 0;
+          const pwValue = nl.find((j) => j.poin == sub.poin)?.[`pw`] || 0;
+          const hasil = dataValue * pwValue;
+          values[`rs${sub.poin}`] = hasil;
+        });
+        return { ...item, ...values };
+      })
+      .map((item) => {
+        const a = sumRSColumn(item, "rs");
+        return { ...item, result: a };
+      })
+      .map((item) => {
+        const b = countRPW(item.poin, item.result);
+        return { ...item, rpw: b };
+      });
+    setRS(() => newRS);
+  }, [nl]);
 
-    if (
-      isNaN(averageColumnValue) ||
-      isNaN(parsedValue) ||
-      averageColumnValue === 0
-    ) {
-      return 0;
-    }
+  function lamda() {
+    const total = rs.reduce((acc, key) => acc + key?.rpw || 0, 0);
+    return total / TOTAL;
+  }
 
-    return averageColumnValue * parsedValue;
-  };
+  function setCi() {
+    return (lamda() - TOTAL) / (TOTAL - 1);
+  }
 
-  const sumColumnResultReCount = (obj) => {
-    const newArray = keys.map((k, i) => {
-      const toSum = parseFloat(
-        multiplicationColumn(data[i], obj[`value${k.poin}`])
-      );
-
-      return { ...k, toSum };
-    });
-
-    const sum = newArray.reduce(
-      (prev, key) => prev + (parseFloat(key[`toSum`]) || 0),
-      0
-    );
-
-    return sum;
-  };
-
-  const rpw = (r, pw) => {
-    const a = parseFloat(r) || 0;
-    const b = parseFloat(pw) || 0;
-    const hasil = parseFloat(a / b).toFixed(2);
-    if (isNaN(hasil)) return 0;
-    return hasil;
-  };
+  function setCr() {
+    return setCi() / 1.12;
+  }
 
   return (
     <>
@@ -170,7 +221,6 @@ function Utama() {
                     {data.map((item, index) => (
                       <tr key={index}>
                         <td className="py-2 px-2 border-b">{item.poin}</td>
-
                         {keys.map((k, i) => (
                           <td key={i} className="py-2 px-2 border-b">
                             <input
@@ -192,11 +242,9 @@ function Utama() {
 
                     <tr>
                       <td className="py-2 px-4 border-b">Jumlah</td>
-                      {keys.map((k, i) => (
+                      {jumlah.map((j, i) => (
                         <td key={i} className="py-2 px-4 border-b">
-                          {parseFloat(
-                            calculateColumnTotal(`value${k.poin}`)
-                          ).toFixed(2)}
+                          {parseFloat(j.jumlah || 0).toFixed(2)}
                         </td>
                       ))}
                     </tr>
@@ -214,7 +262,7 @@ function Utama() {
                 <table className="min-w-full bg-white border border-gray-300">
                   <thead>
                     <tr>
-                      {keys.map((item, index) => (
+                      {nl.map((item, index) => (
                         <th key={index} className="py-2 px-4 border-b">
                           {item.poin}
                         </th>
@@ -224,23 +272,18 @@ function Utama() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((item, index) => (
+                    {nl.map((n, index) => (
                       <tr key={index}>
                         {keys.map((k, i) => (
-                          <td key={i} className="py-2 px-4 border-b">
-                            {parseFloat(
-                              divisionNLColumn(
-                                `value${k.poin}`,
-                                item[`value${k.poin}`]
-                              )
-                            ).toFixed(2)}
+                          <td key={i} className="py-2 px-2 border-b">
+                            {parseFloat(n[`nl${k.poin}`]).toFixed(2)}
                           </td>
                         ))}
                         <td className="py-2 px-4 border-b">
-                          {parseFloat(averageNLColumn(item)).toFixed(2)}
+                          {parseFloat(n.pw).toFixed(2)}
                         </td>
                         <td className="py-2 px-4 border-b">
-                          {sortNLColumn(item.poin)}
+                          {sortNLColumn(n.poin)}
                         </td>
                       </tr>
                     ))}
@@ -264,26 +307,18 @@ function Utama() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.map((item, index) => (
+                    {rs.map((item, index) => (
                       <tr key={index}>
                         {keys.map((k, i) => (
                           <td key={i} className="py-2 px-4 border-b">
-                            {parseFloat(
-                              multiplicationColumn(
-                                data[i],
-                                item[`value${k.poin}`]
-                              )
-                            ).toFixed(2)}
+                            {parseFloat(item[`rs${k.poin}`]).toFixed(2)}
                           </td>
                         ))}
                         <td className="py-2 px-4 border-b">
-                          {parseFloat(sumColumnResultReCount(item)).toFixed(2)}
+                          {parseFloat(item?.result).toFixed(2)}
                         </td>
                         <td className="py-2 px-4 border-b">
-                          {rpw(
-                            sumColumnResultReCount(item),
-                            averageNLColumn(item)
-                          )}
+                          {parseFloat(item?.rpw).toFixed(2)}
                         </td>
                       </tr>
                     ))}
@@ -299,17 +334,23 @@ function Utama() {
                 <tbody>
                   <tr>
                     <td className="py-2 px-4 border-b">lamda max</td>
-                    <td className="py-2 px-4 border-b">-</td>
+                    <td className="py-2 px-4 border-b">
+                      {parseFloat(lamda()).toFixed(2)}
+                    </td>
                   </tr>
 
                   <tr>
                     <td className="py-2 px-4 border-b">CI</td>
-                    <td className="py-2 px-4 border-b">-</td>
+                    <td className="py-2 px-4 border-b">
+                      {parseFloat(setCi()).toFixed(2)}
+                    </td>
                   </tr>
 
                   <tr>
                     <td className="py-2 px-4 border-b">CR</td>
-                    <td className="py-2 px-4 border-b">-</td>
+                    <td className="py-2 px-4 border-b">
+                      {parseFloat(setCr()).toFixed(2)}{" "}
+                    </td>
                   </tr>
                 </tbody>
               </table>
