@@ -1,7 +1,10 @@
+"use client";
 import Link from "next/link";
 import Image from "next/image";
+import { UserButton, useUser } from "@clerk/nextjs";
 
 export default function Header() {
+  const { user, isLoaded } = useUser();
   return (
     <header
       className={`fixed w-full z-30 md:bg-opacity-90 transition duration-300 ease-in-out`}
@@ -35,6 +38,19 @@ export default function Header() {
                   Home
                 </Link>
               </li>
+              {isLoaded && user && (
+                <>
+                  <li>
+                    <Link
+                      href="/formulir"
+                      className="font-medium text-gray-600 hover:text-gray-900 px-5 py-3 flex items-center transition duration-150 ease-in-out"
+                    >
+                      Tugas
+                    </Link>
+                  </li>
+                  <UserButton afterSignOutUrl="/" />
+                </>
+              )}
               <li>
                 <Link
                   className="btn-sm text-gray-200 bg-gray-900 hover:bg-gray-800 ml-3"

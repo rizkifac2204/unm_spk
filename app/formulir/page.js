@@ -1,16 +1,15 @@
-import Utama from "@/components/Utama";
+import Formulir from "@/components/Formulir";
 
-function Formulir() {
+function FormulirPage() {
   return (
     <section className="relative">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="pt-32 pb-12 md:pt-40 md:pb-20">
-          {/* Section header */}
-          <Utama />
+          <Formulir />
         </div>
       </div>
     </section>
   );
 }
 
-export default Formulir;
+export default FormulirPage;
