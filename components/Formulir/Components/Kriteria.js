@@ -2,74 +2,44 @@
 
 import { useState, useEffect } from "react";
 
-const keys = [
-  {
-    poin: "J",
-    key: "valueJ",
-    title: "Jarak",
-  },
-  {
-    poin: "F",
-    key: "valueF",
-    title: "Fasilitas",
-  },
-  {
-    poin: "AJ",
-    key: "valueAJ",
-    title: "Akses Jalan",
-  },
-  {
-    poin: "KB",
-    key: "valueKB",
-    title: "Kelengakapan Barang",
-  },
-  {
-    poin: "H",
-    key: "valueH",
-    title: "Hiburan",
-  },
-];
-
-const TOTAL = keys.length;
-
-const initialData = keys.map((item) => {
-  const values = {};
-  keys.forEach((sub) => {
-    values[`value${sub.poin}`] = "";
-  });
-  return { ...item, ...values };
-});
-
-const initialJumlah = keys.map((item) => {
-  const values = {};
-  keys.forEach((sub) => {
-    values[`jumlah`] = "";
-  });
-  return { ...item, ...values };
-});
-
-const initialNL = keys.map((item) => {
-  const values = {};
-  keys.forEach((sub) => {
-    values[`nl${sub.poin}`] = 0;
-  });
-  values[`pw`] = 0;
-  return { ...item, ...values };
-});
-
-const initialRS = keys.map((item) => {
-  const values = {};
-  keys.forEach((sub) => {
-    values[`rs${sub.poin}`] = 0;
-  });
-  return { ...item, ...values };
-});
-
-function Kriteria() {
-  const [data, setData] = useState(initialData);
-  const [jumlah, setJumlah] = useState(initialJumlah);
-  const [nl, setNl] = useState(initialNL);
-  const [rs, setRS] = useState(initialRS);
+function Kriteria({ keys, TOTAL, kirimDataKeInduk }) {
+  const [data, setData] = useState(
+    keys.map((item) => {
+      const values = {};
+      keys.forEach((sub) => {
+        values[`value${sub.poin}`] = "";
+      });
+      return { ...item, ...values };
+    })
+  );
+  const [jumlah, setJumlah] = useState(
+    keys.map((item) => {
+      const values = {};
+      keys.forEach((sub) => {
+        values[`jumlah`] = "";
+      });
+      return { ...item, ...values };
+    })
+  );
+  const [nl, setNl] = useState(
+    keys.map((item) => {
+      const values = {};
+      keys.forEach((sub) => {
+        values[`nl${sub.poin}`] = 0;
+      });
+      values[`pw`] = 0;
+      return { ...item, ...values };
+    })
+  );
+  const [rs, setRS] = useState(
+    keys.map((item) => {
+      const values = {};
+      keys.forEach((sub) => {
+        values[`rs${sub.poin}`] = 0;
+      });
+      return { ...item, ...values };
+    })
+  );
 
   function autoInput() {
     const autoData = keys.map((item) => {
@@ -259,6 +229,10 @@ function Kriteria() {
     return setCi() / 1.12;
   }
 
+  useEffect(() => {
+    kirimDataKeInduk(nl);
+  }, [nl]);
+
   return (
     <div className="mt-5 shadow p-2">
       <h1 className="text-xl font-bold mb-4">Kriteria</h1>
@@ -271,7 +245,7 @@ function Kriteria() {
                 className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm mb-3"
                 onClick={autoInput}
               >
-                Input Otomatis
+                Input Otomatis Sesuai Makalah
               </button>
             </div>
 
@@ -338,7 +312,7 @@ function Kriteria() {
                           {item.poin}
                         </th>
                       ))}
-                      <th className="py-2 px-4 border-b">PW</th>
+                      <th className="py-2 px-4 border-b">Rata-Rata</th>
                       <th className="py-2 px-4 border-b">P</th>
                     </tr>
                   </thead>

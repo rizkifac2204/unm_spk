@@ -14,13 +14,13 @@ function Info() {
         Aplikasi Sistem Penunjang Keputusan - Kelompok 3
       </h1>
 
-      <div className="bg-gray-100 p-2">
+      <div className="bg-red-100 p-2">
         <div className="container mx-auto">
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
             onClick={toggleCollapse}
           >
-            Baca Keterangan
+            Klik Untuk Baca Keterangan Terlebih Dahulu
           </button>
 
           <div
@@ -68,13 +68,20 @@ function Info() {
                 <b>- Apa yang harus dilakukan</b>
               </h5>
               <div className="p-2">
-                <ul>
-                  <li>User menginputkan nilai pada field yang disediakan</li>
+                <ol>
+                  <li>
+                    User menginputkan nilai pada field yang disediakan secara
+                    manual
+                  </li>
+                  <li>
+                    User dapat langsung klik pada tombol input otomatis yang
+                    akan membuat value sesuai dengan makalah
+                  </li>
                   <li>
                     Sistem akan secara otomatis merumuskan perhitungan
                     berdasarkan metode AHP
                   </li>
-                </ul>
+                </ol>
               </div>
             </div>
           </div>
