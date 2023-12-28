@@ -114,6 +114,8 @@ function Formulir() {
       <Hiburan keys={keysAlternatif} kirimDataKeInduk={terimaDataDariHiburan} />
 
       <Hasil
+        keys={keys}
+        keysAlternatif={keysAlternatif}
         dataKriteria={dataKriteria}
         dataJarak={dataJarak}
         dataFasilitas={dataFasilitas}
