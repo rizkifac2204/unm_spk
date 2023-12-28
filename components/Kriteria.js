@@ -4,29 +4,29 @@ import { useState, useEffect } from "react";
 
 const keys = [
   {
-    poin: "t1",
-    key: "valuet1",
-    title: "title 1",
+    poin: "J",
+    key: "valueJ",
+    title: "Jarak",
   },
   {
-    poin: "t2",
-    key: "valuet2",
-    title: "title 2",
+    poin: "F",
+    key: "valueF",
+    title: "Fasilitas",
   },
   {
-    poin: "t3",
-    key: "valuet3",
-    title: "title 3",
+    poin: "AJ",
+    key: "valueAJ",
+    title: "Akses Jalan",
   },
   {
-    poin: "t4",
-    key: "valuet4",
-    title: "title 4",
+    poin: "KB",
+    key: "valueKB",
+    title: "Kelengakapan Barang",
   },
   {
-    poin: "t5",
-    key: "valuet5",
-    title: "title 5",
+    poin: "H",
+    key: "valueH",
+    title: "Hiburan",
   },
 ];
 
@@ -65,16 +65,81 @@ const initialRS = keys.map((item) => {
   return { ...item, ...values };
 });
 
-function Utama() {
+function Kriteria() {
   const [data, setData] = useState(initialData);
   const [jumlah, setJumlah] = useState(initialJumlah);
   const [nl, setNl] = useState(initialNL);
   const [rs, setRS] = useState(initialRS);
 
-  const handleInputChange = (index, key, value) => {
+  function autoInput() {
+    const autoData = keys.map((item) => {
+      const values = {};
+      if (item.poin == "J") {
+        values[`valueJ`] = "1";
+        values[`valueF`] = "0.95";
+        values[`valueAJ`] = "1.88";
+        values[`valueKB`] = "0.43";
+        values[`valueH`] = "1.99";
+      }
+      if (item.poin == "F") {
+        values[`valueJ`] = "1.05";
+        values[`valueF`] = "1";
+        values[`valueAJ`] = "0.71";
+        values[`valueKB`] = "0.95";
+        values[`valueH`] = "1.50";
+      }
+      if (item.poin == "AJ") {
+        values[`valueJ`] = "0.51";
+        values[`valueF`] = "1.42";
+        values[`valueAJ`] = "1";
+        values[`valueKB`] = "0.79";
+        values[`valueH`] = "2.40";
+      }
+      if (item.poin == "KB") {
+        values[`valueJ`] = "2.34";
+        values[`valueF`] = "1.05";
+        values[`valueAJ`] = "1.28";
+        values[`valueKB`] = "1";
+        values[`valueH`] = "4.67";
+      }
+      if (item.poin == "H") {
+        values[`valueJ`] = "0.5";
+        values[`valueF`] = "0.67";
+        values[`valueAJ`] = "0.42";
+        values[`valueKB`] = "0.21";
+        values[`valueH`] = "1";
+      }
+      return { ...item, ...values };
+    });
+    setData(autoData);
+
+    // Objek untuk menyimpan total masing-masing kunci
+    const totals = {};
+
+    autoData.forEach((obj) => {
+      // Menjumlahkan nilai yang dimulai dengan kata "value" dari setiap objek
+      Object.keys(obj)
+        .filter((key) => key.startsWith("value"))
+        .forEach((key) => {
+          totals[key] = (totals[key] || 0) + parseFloat(obj[key] || 0);
+        });
+    });
+
+    // Array baru untuk menyimpan hasil perhitungan
+    const newArray = Object.keys(totals).map((key) => ({
+      poin: key.substring(5),
+      key: key,
+      jumlah: totals[key],
+    }));
+
+    setJumlah(newArray);
+  }
+
+  const handleInputChangeAndSetJumlah = (index, key, value) => {
     const newData = [...data];
     newData[index][key] = value;
     setData(() => newData);
+
     const jml = data.reduce(
       (total, item) => total + (parseFloat(item[key]) || 0),
       0
@@ -115,7 +180,7 @@ function Utama() {
   };
 
   useEffect(() => {
-    const newNl = nl.map((item, index) => {
+    const newNl = nl.map((item) => {
       const values = {};
       keys.forEach((sub) => {
         const dataValue =
@@ -129,9 +194,10 @@ function Utama() {
         ...values,
       };
     });
+
     setNl(() =>
       newNl.map((item) => {
-        return { ...item, pw: averageNLColumn(item, "nlt") };
+        return { ...item, pw: averageNLColumn(item, "nl") };
       })
     );
   }, [jumlah]);
@@ -139,7 +205,7 @@ function Utama() {
   const sortNLColumn = (poin) => {
     const newArray = nl
       .map((item) => {
-        return { ...item, valuesAverage: averageNLColumn(item, "nlt") };
+        return { ...item, valuesAverage: averageNLColumn(item, "nl") };
       })
       .sort((a, b) => {
         // Jika salah satu dari valuesAverage kosong, letakkan di akhir
@@ -194,15 +260,20 @@ function Utama() {
   }
 
   return (
-    <>
+    <div className="mt-5 shadow p-2">
+      <h1 className="text-xl font-bold mb-4">Kriteria</h1>
       <div className="container mx-auto">
-        <h1 className="text-2xl font-bold mb-4">
-          Aplikasi Sistem Penunjang Keputusan - Kelompok 3
-        </h1>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-4">
           <div className="bg-white p-4 shadow-md">
-            <p className="font-semibold mb-3">Input Nilai</p>
+            <div className="flex justify-between">
+              <p className="font-semibold mb-3">Input Nilai</p>
+              <button
+                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-sm mb-3"
+                onClick={autoInput}
+              >
+                Input Otomatis
+              </button>
+            </div>
 
             <div className="container mx-auto">
               <div className="overflow-x-auto">
@@ -228,7 +299,7 @@ function Utama() {
                               type="number"
                               value={item[`value${k.poin}`]}
                               onChange={(e) =>
-                                handleInputChange(
+                                handleInputChangeAndSetJumlah(
                                   index,
                                   `value${k.poin}`,
                                   e.target.value
@@ -255,7 +326,7 @@ function Utama() {
           </div>
 
           <div className="bg-white p-4 shadow-md">
-            <p className="font-semibold mb-3">Normalisasi</p>
+            <p className="font-semibold mb-6">Normalisasi</p>
 
             <div className="container mx-auto">
               <div className="overflow-x-auto">
@@ -358,8 +429,8 @@ function Utama() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
-export default Utama;
+export default Kriteria;
